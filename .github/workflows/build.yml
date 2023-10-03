@@ -1,0 +1,34 @@
+name: Java Maven Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Maven
+      uses: maven/setup-maven@v1
+      with:
+        java-version: 11
+
+    - name: Build project
+      run: mvn clean package
+
+    - name: Create deployable jar
+      run: |
+        echo "Creating deployable jar..."
+        mvn -Dmaven.test.skip=true package gpg:sign-and-deploy
+        echo "Deployable jar created successfully."
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: archive.zip
+        build_context: '*'
